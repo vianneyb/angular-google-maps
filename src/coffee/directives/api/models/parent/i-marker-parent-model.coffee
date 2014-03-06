@@ -30,6 +30,7 @@ angular.module("google-maps.directives.api.models.parent")
             @$timeout =>
                 @watch('coords', scope)
                 @watch('icon', scope)
+                @watch('zIndex', scope)
                 @watch('options', scope)
                 @onTimeOut(scope)
                 scope.$on "$destroy", =>

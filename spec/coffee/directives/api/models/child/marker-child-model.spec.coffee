@@ -10,6 +10,7 @@ describe "MarkerChildModel", ->
             options:
                 animation: google.maps.Animation.BOUNCE
         @iconKey = 'icon'
+        @zIndexKey = 'zIndex'
         @coordsKey = 'coords'
         @optionsKey = 'options'
 

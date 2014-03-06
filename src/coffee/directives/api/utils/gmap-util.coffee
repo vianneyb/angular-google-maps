@@ -10,12 +10,13 @@ angular.module("google-maps.directives.api.utils")
         if xPos && yPos
             new google.maps.Point(xPos, yPos)
 
-    createMarkerOptions: (coords, icon, defaults, map = undefined) ->
+    createMarkerOptions: (coords, icon, zIndex, defaults, map = undefined) ->
         defaults = {} unless defaults?
         opts = angular.extend {}, defaults,
             position: if defaults.position? then defaults.position
             else new google.maps.LatLng(coords.latitude, coords.longitude),
             icon: if defaults.icon? then defaults.icon else icon,
+            zIndex: if defaults.zIndex? then defaults.zIndex else zIndex,
             visible: if defaults.visible? then defaults.visible else coords.latitude? and coords.longitude?
         opts.map = map if map?
         opts

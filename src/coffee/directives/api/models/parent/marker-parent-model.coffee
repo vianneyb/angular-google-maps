@@ -1,5 +1,5 @@
 ###
-	Basic Directive api for a marker. Basic in the sense that this directive contains 1:1 on scope and model. 
+	Basic Directive api for a marker. Basic in the sense that this directive contains 1:1 on scope and model.
 	Thus there will be one html element per marker within the directive.
 ###
 angular.module("google-maps.directives.api.models.parent")
@@ -11,7 +11,7 @@ angular.module("google-maps.directives.api.models.parent")
             self = @
 
         onTimeOut:(scope)=>
-            opts = @createMarkerOptions(scope.coords, scope.icon, scope.options, @mapCtrl.getMap())
+            opts = @createMarkerOptions(scope.coords, scope.icon, scope.zIndex, scope.options, @mapCtrl.getMap())
             #using scope.$id as the identifier for a marker as scope.$id should be unique, no need for an index (as it is the index)
             @scope.gMarker = new google.maps.Marker(opts)
 
@@ -36,17 +36,25 @@ angular.module("google-maps.directives.api.models.parent")
                         @scope.gMarker.setMap(null)
                 when 'icon'
                     if (scope.icon? and scope.coords? and @scope.gMarker?)
-                        @scope.gMarker.setOptions(scope.options)
+                        # @scope.gMarker.setOptions(scope.options)
                         @scope.gMarker.setIcon(scope.icon)
-                        @scope.gMarker.setMap(null)
-                        @scope.gMarker.setMap(@mapCtrl.getMap())
-                        @scope.gMarker.setPosition(new google.maps.LatLng(scope.coords.latitude, scope.coords.longitude))
-                        @scope.gMarker.setVisible(scope.coords.latitude and scope.coords.longitude?)
+                        # @scope.gMarker.setMap(null)
+                        # @scope.gMarker.setMap(@mapCtrl.getMap())
+                        # @scope.gMarker.setPosition(new google.maps.LatLng(scope.coords.latitude, scope.coords.longitude))
+                        # @scope.gMarker.setVisible(scope.coords.latitude and scope.coords.longitude?)
+                when 'zIndex'
+                    if (scope.icon? and scope.coords? and scope.zIndex? and @scope.gMarker?)
+                        # @scope.gMarker.setOptions(scope.options)
+                        # @scope.gMarker.setIcon(scope.icon)
+                        @scope.gMarker.setZIndex(scope.zIndex)
+                        # @scope.gMarker.setMap(@mapCtrl.getMap())
+                        # @scope.gMarker.setPosition(new google.maps.LatLng(scope.coords.latitude, scope.coords.longitude))
+                        # @scope.gMarker.setVisible(scope.coords.latitude and scope.coords.longitude?)
                 when 'options'
                     if scope.coords? and scope.icon? and scope.options
                         @scope.gMarker.setMap(null) if @scope.gMarker?
                         delete @scope.gMarker
-                        @scope.gMarker = new google.maps.Marker(@createMarkerOptions(scope.coords, scope.icon, scope.options,
+                        @scope.gMarker = new google.maps.Marker(@createMarkerOptions(scope.coords, scope.icon, scope.zIndex, scope.options,
                                 @mapCtrl.getMap()))
 
         onDestroy: (scope)=>

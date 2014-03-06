@@ -1,4 +1,4 @@
-/*! angular-google-maps 1.1.0-SNAPSHOT 2014-02-17
+/*! angular-google-maps 1.1.0-SNAPSHOT 2014-03-06
  *  AngularJS directives for Google Maps
  *  git: https://github.com/nlaplante/angular-google-maps.git
  */
@@ -310,7 +310,7 @@ Nicholas McCready - https://twitter.com/nmccready
             return new google.maps.Point(xPos, yPos);
           }
         },
-        createMarkerOptions: function(coords, icon, defaults, map) {
+        createMarkerOptions: function(coords, icon, zIndex, defaults, map) {
           var opts;
           if (map == null) {
             map = void 0;
@@ -321,6 +321,7 @@ Nicholas McCready - https://twitter.com/nmccready
           opts = angular.extend({}, defaults, {
             position: defaults.position != null ? defaults.position : new google.maps.LatLng(coords.latitude, coords.longitude),
             icon: defaults.icon != null ? defaults.icon : icon,
+            zIndex: defaults.zIndex != null ? defaults.zIndex : zIndex,
             visible: defaults.visible != null ? defaults.visible : (coords.latitude != null) && (coords.longitude != null)
           });
           if (map != null) {
@@ -1066,6 +1067,7 @@ Nicholas McCready - https://twitter.com/nmccready
           this.setLabelOptions = __bind(this.setLabelOptions, this);
           this.isLabelDefined = __bind(this.isLabelDefined, this);
           this.setOptions = __bind(this.setOptions, this);
+          this.setZIndex = __bind(this.setZIndex, this);
           this.setIcon = __bind(this.setIcon, this);
           this.setCoords = __bind(this.setCoords, this);
           this.destroy = __bind(this.destroy, this);
@@ -1074,6 +1076,7 @@ Nicholas McCready - https://twitter.com/nmccready
           this.setMyScope = __bind(this.setMyScope, this);
           self = this;
           this.iconKey = this.parentScope.icon;
+          this.zIndexKey = this.parentScope.zIndex;
           this.coordsKey = this.parentScope.coords;
           this.clickKey = this.parentScope.click();
           this.labelContentKey = this.parentScope.labelContent;
@@ -1101,6 +1104,7 @@ Nicholas McCready - https://twitter.com/nmccready
             isInit = false;
           }
           this.maybeSetScopeValue('icon', model, oldModel, this.iconKey, this.evalModelHandle, isInit, this.setIcon);
+          this.maybeSetScopeValue('zIndex', model, oldModel, this.zIndexKey, this.evalModelHandle, isInit, this.setZIndex);
           this.maybeSetScopeValue('coords', model, oldModel, this.coordsKey, this.evalModelHandle, isInit, this.setCoords);
           this.maybeSetScopeValue('labelContent', model, oldModel, this.labelContentKey, this.evalModelHandle, isInit);
           this.maybeSetScopeValue('click', model, oldModel, this.clickKey, this.evalModelHandle, isInit);
@@ -1166,7 +1170,7 @@ Nicholas McCready - https://twitter.com/nmccready
           }
           if ((scope.coords != null)) {
             if ((this.scope.coords.latitude == null) || (this.scope.coords.longitude == null)) {
-              this.$log.error("MarkerChildMarker cannot render marker as scope.coords as no position on marker: " + (JSON.stringify(this.model)));
+              this.$log.info("MarkerChildMarker cannot render marker as scope.coords as no position on marker: " + (JSON.stringify(this.model)));
               return;
             }
             this.gMarker.setPosition(new google.maps.LatLng(scope.coords.latitude, scope.coords.longitude));
@@ -1182,11 +1186,16 @@ Nicholas McCready - https://twitter.com/nmccready
           if (scope.$id !== this.scope.$id || this.gMarker === void 0) {
             return;
           }
-          this.gMarkerManager.remove(this.gMarker);
-          this.gMarker.setIcon(scope.icon);
-          this.gMarkerManager.add(this.gMarker);
-          this.gMarker.setPosition(new google.maps.LatLng(scope.coords.latitude, scope.coords.longitude));
-          return this.gMarker.setVisible(scope.coords.latitude && (scope.coords.longitude != null));
+          this.$log.info("marker setIcon");
+          return this.gMarker.setIcon(scope.icon);
+        };
+
+        MarkerChildModel.prototype.setZIndex = function(scope) {
+          if (scope.$id !== this.scope.$id || this.gMarker === void 0) {
+            return;
+          }
+          this.$log.info("marker setIndex");
+          return this.gMarker.setZIndex(scope.zIndex);
         };
 
         MarkerChildModel.prototype.setOptions = function(scope) {
@@ -1202,7 +1211,7 @@ Nicholas McCready - https://twitter.com/nmccready
           if (!((_ref = scope.coords) != null ? _ref : typeof scope.icon === "function" ? scope.icon(scope.options != null) : void 0)) {
             return;
           }
-          this.opts = this.createMarkerOptions(scope.coords, scope.icon, scope.options);
+          this.opts = this.createMarkerOptions(scope.coords, scope.icon, scope.zIndex, scope.options);
           delete this.gMarker;
           if (this.isLabelDefined(scope)) {
             this.gMarker = new MarkerWithLabel(this.setLabelOptions(this.opts, scope));
@@ -1491,6 +1500,7 @@ Nicholas McCready - https://twitter.com/nmccready
           this.$timeout(function() {
             _this.watch('coords', scope);
             _this.watch('icon', scope);
+            _this.watch('zIndex', scope);
             _this.watch('options', scope);
             _this.onTimeOut(scope);
             return scope.$on("$destroy", function() {
@@ -1672,7 +1682,7 @@ Nicholas McCready - https://twitter.com/nmccready
 }).call(this);
 
 /*
-	Basic Directive api for a marker. Basic in the sense that this directive contains 1:1 on scope and model. 
+	Basic Directive api for a marker. Basic in the sense that this directive contains 1:1 on scope and model.
 	Thus there will be one html element per marker within the directive.
 */
 
@@ -1702,7 +1712,7 @@ Nicholas McCready - https://twitter.com/nmccready
         MarkerParentModel.prototype.onTimeOut = function(scope) {
           var opts,
             _this = this;
-          opts = this.createMarkerOptions(scope.coords, scope.icon, scope.options, this.mapCtrl.getMap());
+          opts = this.createMarkerOptions(scope.coords, scope.icon, scope.zIndex, scope.options, this.mapCtrl.getMap());
           this.scope.gMarker = new google.maps.Marker(opts);
           google.maps.event.addListener(this.scope.gMarker, 'click', function() {
             if (_this.doClick && (scope.click != null)) {
@@ -1729,12 +1739,12 @@ Nicholas McCready - https://twitter.com/nmccready
               break;
             case 'icon':
               if ((scope.icon != null) && (scope.coords != null) && (this.scope.gMarker != null)) {
-                this.scope.gMarker.setOptions(scope.options);
-                this.scope.gMarker.setIcon(scope.icon);
-                this.scope.gMarker.setMap(null);
-                this.scope.gMarker.setMap(this.mapCtrl.getMap());
-                this.scope.gMarker.setPosition(new google.maps.LatLng(scope.coords.latitude, scope.coords.longitude));
-                return this.scope.gMarker.setVisible(scope.coords.latitude && (scope.coords.longitude != null));
+                return this.scope.gMarker.setIcon(scope.icon);
+              }
+              break;
+            case 'zIndex':
+              if ((scope.icon != null) && (scope.coords != null) && (scope.zIndex != null) && (this.scope.gMarker != null)) {
+                return this.scope.gMarker.setZIndex(scope.zIndex);
               }
               break;
             case 'options':
@@ -1743,7 +1753,7 @@ Nicholas McCready - https://twitter.com/nmccready
                   this.scope.gMarker.setMap(null);
                 }
                 delete this.scope.gMarker;
-                return this.scope.gMarker = new google.maps.Marker(this.createMarkerOptions(scope.coords, scope.icon, scope.options, this.mapCtrl.getMap()));
+                return this.scope.gMarker = new google.maps.Marker(this.createMarkerOptions(scope.coords, scope.icon, scope.zIndex, scope.options, this.mapCtrl.getMap()));
               }
           }
         };
@@ -2333,6 +2343,7 @@ Nicholas McCready - https://twitter.com/nmccready
  		- attributes
  			- coords
  			- icon
+            - zIndex
 		- implementation needed on watches
 */
 
@@ -2362,6 +2373,7 @@ Nicholas McCready - https://twitter.com/nmccready
           this.scope = {
             coords: '=coords',
             icon: '=icon',
+            zIndex: '=zindex',
             click: '&click',
             options: '=options',
             events: '=events'

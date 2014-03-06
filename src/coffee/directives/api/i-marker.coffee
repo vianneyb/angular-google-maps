@@ -4,6 +4,7 @@
  		- attributes
  			- coords
  			- icon
+            - zIndex
 		- implementation needed on watches
 ###
 angular.module("google-maps.directives.api")
@@ -21,6 +22,7 @@ angular.module("google-maps.directives.api")
             @scope =
                 coords: '=coords',
                 icon: '=icon',
+                zIndex: '=zindex',
                 click: '&click',
                 options: '=options',
                 events: '=events'
